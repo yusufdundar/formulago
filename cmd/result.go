@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -36,7 +37,10 @@ var resultCmd = &cobra.Command{
 		} else if Race {
 			showRace()
 		} else {
-			cmd.Help()
+			err := cmd.Help()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 	},
