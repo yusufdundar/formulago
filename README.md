@@ -3,6 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/yusufdundar/formulago?label=license)
 [![Go](https://github.com/yusufdundar/formulago/actions/workflows/go.yml/badge.svg)](https://github.com/yusufdundar/formulago/actions/workflows/go.yml)
 [![golangci-lint](https://github.com/yusufdundar/formulago/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/yusufdundar/formulago/actions/workflows/golangci-lint.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yusufdundar/formulago)](https://goreportcard.com/report/github.com/yusufdundar/formulago)
 
 ---
 
@@ -23,7 +24,7 @@ Basicly It scrapes [Formula 1](https://formula1.com) website to get information 
    go install github.com/yusufdundar/formulago@latest
    ```
 
-> **Warning**
+> **Warning**\
 > In order to run `formulago` from anywhere in terminal `$GOPATH/bin` environment value must be in the PATH.
 
 ## 🏁 Usage
