@@ -6,9 +6,10 @@
 
 ---
 
-## 💡 About The Project
+## 🏎  About The Project
 
-Formula 1 race statistics for CLI written with GO
+Formula 1 race statistics for CLI written with GO.\
+Basicly It scrapes [Formula 1](https://formula1.com) website to get information about standings and race result.
 
 ![FormulaGo gif](assets/formulago_driver.gif "FormulaGo gif")
 
@@ -19,11 +20,13 @@ Formula 1 race statistics for CLI written with GO
 2. Install with GO
 
    ```sh
-   go install github.com/yusufdundar/formulago
+   go install github.com/yusufdundar/formulago@latest
    ```
 
+> **Warning**
+> In order to run `formulago` from anywhere in terminal `$GOPATH/bin` environment value must be in the PATH.
 
-## 👀 Usage
+## 🏁 Usage
 
 For now FormulaGo have one command.
 
@@ -44,7 +47,7 @@ There are 3 different flags you can use with the `result` command.
 This project uses following go libraries:
 
 * [cobra](https://github.com/spf13/cobra)
-* [goquery](github.com/PuerkitoBio/goquery)
+* [goquery](https://github.com/PuerkitoBio/goquery)
 * [tablewriter](https://github.com/olekukonko/tablewriter)
 
 ## ⚠️ License
