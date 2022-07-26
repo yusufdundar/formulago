@@ -52,7 +52,7 @@ func showDriver() {
 
 	driverData := parser.ParseDriver()
 
-	data := [][]string{}
+	var data [][]string
 
 	for _, driver := range driverData {
 		data = append(data, []string{driver.Pos, driver.Name, driver.Nat, driver.Team, driver.Pts})
@@ -70,7 +70,7 @@ func showConstructor() {
 
 	teamData := parser.ParseTeam()
 
-	data := [][]string{}
+	var data [][]string
 
 	for _, team := range teamData {
 		data = append(data, []string{team.Pos, team.Name, team.Pts})
@@ -88,7 +88,7 @@ func showRace() {
 
 	raceData := parser.ParseRace()
 
-	data := [][]string{}
+	var data [][]string
 
 	for _, race := range raceData {
 		data = append(data, []string{race.GrandPrix, race.Date, race.Winner, race.Car, race.Laps, race.Time})

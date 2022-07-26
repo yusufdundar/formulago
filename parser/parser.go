@@ -19,7 +19,7 @@ var driverUrl = "https://www.formula1.com/en/results.html/2022/drivers.html"
 var teamUrl = "https://www.formula1.com/en/results.html/2022/team.html"
 var raceUrl = "https://www.formula1.com/en/results.html/2022/races.html"
 
-// Parse the driver standing info from formula1 website
+// ParseDriver Parse the driver standing info from formula1 website
 func ParseDriver() []model.Driver {
 
 	var pos = ""
@@ -28,7 +28,7 @@ func ParseDriver() []model.Driver {
 	var car = ""
 	var pts = ""
 
-	DriverList := []model.Driver{}
+	var DriverList []model.Driver
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Get(driverUrl)
@@ -66,14 +66,14 @@ func ParseDriver() []model.Driver {
 	return DriverList
 }
 
-// Parse the constructor standing info from formula1 website
+// ParseTeam Parse the constructor standing info from formula1 website
 func ParseTeam() []model.Team {
 
 	var pos = ""
 	var name = ""
 	var pts = ""
 
-	TeamList := []model.Team{}
+	var TeamList []model.Team
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Get(teamUrl)
@@ -108,7 +108,7 @@ func ParseTeam() []model.Team {
 	return TeamList
 }
 
-// Parse the F1 race info from formula1 website
+// ParseRace Parse the F1 race info from formula1 website
 func ParseRace() []model.Race {
 
 	var grandPrix = ""
@@ -118,7 +118,7 @@ func ParseRace() []model.Race {
 	var laps = ""
 	var totalTime = ""
 
-	RaceList := []model.Race{}
+	var RaceList []model.Race
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Get(raceUrl)

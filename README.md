@@ -1,6 +1,7 @@
 ![FormulaGo Logo](assets/formulago_logo.png "FormulaGo")
 
-![GitHub](https://img.shields.io/github/license/yusufdundar/formulago?label=license)
+[![Go Reference](https://pkg.go.dev/badge/github.com/yusufdundar/formulago.svg)](https://pkg.go.dev/github.com/yusufdundar/formulago)
+[![GitHub](https://img.shields.io/github/license/yusufdundar/formulago?label=license)](./LICENSE)
 [![Go](https://github.com/yusufdundar/formulago/actions/workflows/go.yml/badge.svg)](https://github.com/yusufdundar/formulago/actions/workflows/go.yml)
 [![golangci-lint](https://github.com/yusufdundar/formulago/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/yusufdundar/formulago/actions/workflows/golangci-lint.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yusufdundar/formulago)](https://goreportcard.com/report/github.com/yusufdundar/formulago)
