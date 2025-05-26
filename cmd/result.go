@@ -50,14 +50,22 @@ func showDriver() {
 	captionText := "\nCurrent Driver standings as of " + time.Now().Format(DATE_FORMAT_STRING)
 	fmt.Println(captionText)
 
+	// Fetch driver data using the parser
 	driverData := parser.ParseDriver()
 
-	var data [][]string
+	// Check if data was retrieved
+	if len(driverData) == 0 {
+		fmt.Println("No driver data found or an error occurred while fetching.")
+		return
+	}
 
+	// Prepare data for table
+	var data [][]string
 	for _, driver := range driverData {
 		data = append(data, []string{driver.Pos, driver.Name, driver.Nat, driver.Team, driver.Pts})
 	}
 
+	// Create and render table
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"POS", "DRIVER", "NATION", "TEAM", "PTS"})
 	table.AppendBulk(data)
@@ -68,14 +76,22 @@ func showConstructor() {
 	captionText := "\nCurrent constructor standings as of " + time.Now().Format(DATE_FORMAT_STRING)
 	fmt.Println(captionText)
 
+	// Fetch team data using the parser
 	teamData := parser.ParseTeam()
 
-	var data [][]string
+	// Check if data was retrieved
+	if len(teamData) == 0 {
+		fmt.Println("No constructor data found or an error occurred while fetching.")
+		return
+	}
 
+	// Prepare data for table
+	var data [][]string
 	for _, team := range teamData {
 		data = append(data, []string{team.Pos, team.Name, team.Pts})
 	}
 
+	// Create and render table
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"POS", "TEAM", "PTS"})
 	table.AppendBulk(data)
@@ -86,14 +102,22 @@ func showRace() {
 	captionText := "\nRace results as of " + time.Now().Format(DATE_FORMAT_STRING)
 	fmt.Println(captionText)
 
+	// Fetch race data using the parser
 	raceData := parser.ParseRace()
 
-	var data [][]string
+	// Check if data was retrieved
+	if len(raceData) == 0 {
+		fmt.Println("No race data found or an error occurred while fetching.")
+		return
+	}
 
+	// Prepare data for table
+	var data [][]string
 	for _, race := range raceData {
 		data = append(data, []string{race.GrandPrix, race.Date, race.Winner, race.Car, race.Laps, race.Time})
 	}
 
+	// Create and render table
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"GRAND PRIX", "DATE", "WINNER", "CAR", "LAPS", "TIME"})
 	table.AppendBulk(data)
