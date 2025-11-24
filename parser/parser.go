@@ -115,40 +115,6 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 	// and text content being YYYY.
 	doc.Find("a[href*='/en/results.html/']").Each(func(i int, s *goquery.Selection) {
 		yearStr := strings.TrimSpace(s.Text())
-		href, _ := s.Attr("href") // href existence is guaranteed by the selector's attribute part
-
-		if len(yearStr) == 4 {
-			year, err := strconv.Atoi(yearStr)
-			if err == nil {
-				// Validate if the year from text is actually in the relevant part of the href
-				if strings.Contains(href, "/results.html/"+yearStr+"/") {
-					if !yearMap[year] {
-						years = append(years, year)
-						yearMap[year] = true
-						// log.Printf("Targeted search: Found valid year %d from text '%s' and href '%s'", year, yearStr, href)
-					}
-				}
-			}
-		}
-	})
-
-	// Attempt 2: Broad search if targeted search yields no results or to augment (though yearMap handles duplicates)
-	if len(years) == 0 {
-		doc.Find("a").Each(func(i int, s *goquery.Selection) {
-			yearStrRaw := s.Text()
-			href, exists := s.Attr("href")
-			// Log the raw text and href
-
-			yearStr := strings.TrimSpace(yearStrRaw)
-
-			if len(yearStr) == 4 && exists { // Ensure href exists here
-				year, err := strconv.Atoi(yearStr)
-				if err == nil {
-					// Basic sanity check for year range
-					currentMaxYear := time.Now().Year() + 5 // Allow a small buffer for future years
-					if year >= 1950 && year <= currentMaxYear {
-						expectedPrefix := "/en/results/"           // Corrected prefix
-						expectedYearSegment := "/" + yearStr + "/" // e.g., "/2024/"
 
 						isValid := strings.HasPrefix(href, expectedPrefix) && strings.Contains(href, expectedYearSegment)
 
