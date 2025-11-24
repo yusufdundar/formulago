@@ -101,7 +101,6 @@ func parseName(rawName string) string {
 func FetchLatestResultsYear(initialUrl string) (string, error) {
 	// Temporarily override initialUrl for this specific test run
 	fixedTestUrl := "https://www.formula1.com/en/results.html"
-	log.Printf("Attempting to find year links in FetchLatestResultsYear. OVERRIDE URL in use: %s (original initialUrl was: %s)", fixedTestUrl, initialUrl)
 
 	doc, err := fetchDocument(fixedTestUrl)
 	if err != nil {
@@ -135,12 +134,10 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 
 	// Attempt 2: Broad search if targeted search yields no results or to augment (though yearMap handles duplicates)
 	if len(years) == 0 {
-		log.Println("Targeted year search failed or found no years, attempting broad search for all links.")
 		doc.Find("a").Each(func(i int, s *goquery.Selection) {
 			yearStrRaw := s.Text()
 			href, exists := s.Attr("href")
 			// Log the raw text and href
-			log.Printf("Broad search: Checking link raw_text '%s' with href '%s'", yearStrRaw, href)
 
 			yearStr := strings.TrimSpace(yearStrRaw)
 
@@ -159,24 +156,16 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 							if !yearMap[year] {
 								years = append(years, year)
 								yearMap[year] = true
-								log.Printf("Broad search: Validated and added year '%s' from href '%s'", yearStr, href)
 							}
 						} else {
 							// Log failure details
-							log.Printf("Broad search: Link failed validation. TrimmedText: '%s', Href: '%s', StartsWithPrefixCheck: %t (%s vs %s), ContainsSegmentCheck: %t (%s vs %s)",
-								yearStr, href,
-								strings.HasPrefix(href, expectedPrefix), href, expectedPrefix,
-								strings.Contains(href, expectedYearSegment), href, expectedYearSegment)
 						}
 					}
 				}
 			} else if len(yearStr) == 4 && !exists { // Log if href is missing for a potential year string
-				log.Printf("Broad search: Potential year text '%s' found, but href does not exist.", yearStr)
 			}
 		})
 	}
-
-	log.Printf("Found %d potential year(s) after search attempts.", len(years))
 
 	if len(years) == 0 {
 		// Ensure the error message reflects the URL actually used for fetching
