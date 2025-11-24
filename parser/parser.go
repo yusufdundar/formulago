@@ -20,14 +20,6 @@ import (
 	"github.com/yusufdundar/formulago/model"
 )
 
-// snippet returns a shortened version of a string if it exceeds a specified length.
-func snippet(s string, length int) string {
-	if len(s) > length {
-		return s[:length] + "..."
-	}
-	return s
-}
-
 // fetchDocument performs an HTTP GET request for the given URL and returns
 // a goquery.Document if successful.
 // It includes a 30-second timeout for the request.
@@ -98,8 +90,9 @@ func parseName(rawName string) string {
 //
 // Attempt 2 (Broad Search - Fallback): If the targeted search yields no years, it iterates through ALL <a> tags.
 // For each link, it logs its text and href for debugging purposes. It then validates if:
-//   1. The link's text is a 4-digit number (e.g., between 1950 and current year + buffer for future).
-//   2. The link's `href` attribute exists and contains "/results.html/" + the found year string + "/".
+//  1. The link's text is a 4-digit number (e.g., between 1950 and current year + buffer for future).
+//  2. The link's `href` attribute exists and contains "/results.html/" + the found year string + "/".
+//
 // This broad search helps identify potential year links even if their structure deviates significantly.
 //
 // The function sorts all unique, validated years in descending order and returns the first one
@@ -109,7 +102,7 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 	// Temporarily override initialUrl for this specific test run
 	fixedTestUrl := "https://www.formula1.com/en/results.html"
 	log.Printf("Attempting to find year links in FetchLatestResultsYear. OVERRIDE URL in use: %s (original initialUrl was: %s)", fixedTestUrl, initialUrl)
-	
+
 	doc, err := fetchDocument(fixedTestUrl)
 	if err != nil {
 		// Ensure the error message reflects the URL actually used for fetching
@@ -157,9 +150,9 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 					// Basic sanity check for year range
 					currentMaxYear := time.Now().Year() + 5 // Allow a small buffer for future years
 					if year >= 1950 && year <= currentMaxYear {
-						expectedPrefix := "/en/results/" // Corrected prefix
+						expectedPrefix := "/en/results/"           // Corrected prefix
 						expectedYearSegment := "/" + yearStr + "/" // e.g., "/2024/"
-						
+
 						isValid := strings.HasPrefix(href, expectedPrefix) && strings.Contains(href, expectedYearSegment)
 
 						if isValid {
@@ -170,8 +163,8 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 							}
 						} else {
 							// Log failure details
-							log.Printf("Broad search: Link failed validation. TrimmedText: '%s', Href: '%s', StartsWithPrefixCheck: %t (%s vs %s), ContainsSegmentCheck: %t (%s vs %s)", 
-								yearStr, href, 
+							log.Printf("Broad search: Link failed validation. TrimmedText: '%s', Href: '%s', StartsWithPrefixCheck: %t (%s vs %s), ContainsSegmentCheck: %t (%s vs %s)",
+								yearStr, href,
 								strings.HasPrefix(href, expectedPrefix), href, expectedPrefix,
 								strings.Contains(href, expectedYearSegment), href, expectedYearSegment)
 						}
@@ -182,7 +175,7 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 			}
 		})
 	}
-	
+
 	log.Printf("Found %d potential year(s) after search attempts.", len(years))
 
 	if len(years) == 0 {
@@ -207,15 +200,13 @@ func ParseDriver() []model.Driver {
 	defaultYear := strconv.Itoa(time.Now().Year()) // Dynamic default year
 	// Use a consistent page (like drivers) for fetching the latest year.
 	yearFetchingURL := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", defaultYear)
-	
+
 	latestYear, err := FetchLatestResultsYear(yearFetchingURL)
 	if err != nil {
 		log.Printf("Error fetching latest year for Drivers: %v. Falling back to default year %s.", err, defaultYear)
 		latestYear = defaultYear
-	} else {
-		// log.Printf("Successfully fetched dynamic year for Drivers: %s.", latestYear)
 	}
-	
+
 	driverUrl := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", latestYear)
 	var DriverList []model.Driver
 
@@ -229,7 +220,7 @@ func ParseDriver() []model.Driver {
 	data := doc.Find("table tbody tr")
 	data.Each(func(i int, s *goquery.Selection) {
 		pos := strings.TrimSpace(s.Find("td:nth-child(1)").Text())
-		
+
 		// Name is now in nested spans inside an anchor tag
 		// Structure: <a ...><span><span class="max-lg:hidden">First</span> <span class="max-md:hidden">Last</span><span class="md:hidden">CODE</span></span></a>
 		// We want First + Last.
@@ -237,7 +228,7 @@ func ParseDriver() []model.Driver {
 		firstName := strings.TrimSpace(driverCell.Find("span.max-lg\\:hidden").Text())
 		lastName := strings.TrimSpace(driverCell.Find("span.max-md\\:hidden").Text())
 		name := fmt.Sprintf("%s %s", firstName, lastName)
-		
+
 		// Fallback if specific classes aren't found (robustness)
 		if firstName == "" && lastName == "" {
 			name = strings.TrimSpace(driverCell.Text())
@@ -267,13 +258,11 @@ func ParseDriver() []model.Driver {
 func ParseTeam() []model.Team {
 	defaultYear := strconv.Itoa(time.Now().Year()) // Dynamic default year
 	yearFetchingURL := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", defaultYear)
-	
+
 	latestYear, err := FetchLatestResultsYear(yearFetchingURL)
 	if err != nil {
 		log.Printf("Error fetching latest year for Teams: %v. Falling back to default year %s.", err, defaultYear)
 		latestYear = defaultYear
-	} else {
-		// log.Printf("Successfully fetched dynamic year for Teams: %s.", latestYear)
 	}
 
 	teamUrl := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/team.html", latestYear)
@@ -284,7 +273,7 @@ func ParseTeam() []model.Team {
 		log.Printf("Failed to fetch or parse team data from %s: %v.", teamUrl, err)
 		return TeamList // Return empty list on error
 	}
-	
+
 	// Assumes Pos, Team Name, Pts are in columns 1, 2, 3 respectively.
 	data := doc.Find("table tbody tr")
 	data.Each(func(i int, s *goquery.Selection) {
@@ -320,8 +309,6 @@ func ParseRace() []model.Race {
 	if err != nil {
 		log.Printf("Error fetching latest year for Races: %v. Falling back to default year %s.", err, defaultYear)
 		latestYear = defaultYear
-	} else {
-		// log.Printf("Successfully fetched dynamic year for Races: %s.", latestYear)
 	}
 
 	raceUrl := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/races.html", latestYear)
@@ -337,12 +324,12 @@ func ParseRace() []model.Race {
 	data := doc.Find("table tbody tr")
 	data.Each(func(i int, s *goquery.Selection) {
 		grandPrix := strings.TrimSpace(s.Find("td:nth-child(1) a").Text()) // Grand Prix from 1st column (usually a link)
-		if grandPrix == "" { // Fallback if not a link
+		if grandPrix == "" {                                               // Fallback if not a link
 			grandPrix = strings.TrimSpace(s.Find("td:nth-child(1)").Text())
 		}
 
 		date := strings.TrimSpace(s.Find("td:nth-child(2)").Text()) // Date from 2nd column
-		
+
 		// Winner from 3rd column. Structure similar to driver name: nested spans in anchor.
 		winnerCell := s.Find("td:nth-child(3)")
 		firstName := strings.TrimSpace(winnerCell.Find("span.max-lg\\:hidden").Text())
