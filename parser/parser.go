@@ -116,19 +116,29 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 	doc.Find("a[href*='/en/results.html/']").Each(func(i int, s *goquery.Selection) {
 		yearStr := strings.TrimSpace(s.Text())
 
-						isValid := strings.HasPrefix(href, expectedPrefix) && strings.Contains(href, expectedYearSegment)
+		// Try to parse the text as a 4-digit year
+		if len(yearStr) == 4 {
+			year, err := strconv.Atoi(yearStr)
+			if err == nil && year >= 1950 && year <= time.Now().Year()+5 {
+				// Get the href attribute
+				href, exists := s.Attr("href")
+				if exists {
+					// Validate the href contains the year
+					expectedPrefix := "/en/results.html/"
+					expectedYearSegment := "/" + yearStr + "/"
 
-						if isValid {
-							if !yearMap[year] {
-								years = append(years, year)
-								yearMap[year] = true
-							}
+					isValid := strings.HasPrefix(href, expectedPrefix) && strings.Contains(href, expectedYearSegment)
+
+					if isValid {
+						if !yearMap[year] {
+							years = append(years, year)
+							yearMap[year] = true
 						}
 					}
 				}
 			}
-		})
-	}
+		}
+	})
 
 	if len(years) == 0 {
 		// Ensure the error message reflects the URL actually used for fetching
