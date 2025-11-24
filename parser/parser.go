@@ -126,7 +126,7 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 						}
 					}
 				}
-
+			}
 		})
 	}
 
