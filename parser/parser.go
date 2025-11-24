@@ -317,6 +317,16 @@ func ParseRace() []model.Race {
 			grandPrix = strings.TrimSpace(s.Find("td:nth-child(1)").Text())
 		}
 
+		// Clean up race name by removing "flag of [country]" text
+		// Example: "flag of Bahrain Bahrain Grand Prix" -> "Bahrain Grand Prix"
+		if strings.HasPrefix(strings.ToLower(grandPrix), "flag of ") {
+			// Remove "flag of [country] " prefix
+			parts := strings.SplitN(grandPrix, " ", 4) // ["flag", "of", "Country", "Rest..."]
+			if len(parts) >= 4 {
+				grandPrix = strings.TrimSpace(parts[3])
+			}
+		}
+
 		date := strings.TrimSpace(s.Find("td:nth-child(2)").Text()) // Date from 2nd column
 
 		// Winner from 3rd column. Structure similar to driver name: nested spans in anchor.
