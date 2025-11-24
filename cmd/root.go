@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 Yusuf DÜNDAR <info@dundar.dev>
-
 */
 package cmd
 
@@ -12,7 +11,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: "0.1.0",
+	Version: "0.2.0",
 	Use:     "formulago",
 	Short:   "This application displays statistics about the F1 race in your terminal.",
 	Long: `This app displays current statistics about F1 races 
