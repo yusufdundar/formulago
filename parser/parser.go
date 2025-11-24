@@ -157,13 +157,10 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 								years = append(years, year)
 								yearMap[year] = true
 							}
-						} else {
-							// Log failure details
 						}
 					}
 				}
-			} else if len(yearStr) == 4 && !exists { // Log if href is missing for a potential year string
-			}
+
 		})
 	}
 
