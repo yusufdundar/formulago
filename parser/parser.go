@@ -204,7 +204,7 @@ func FetchLatestResultsYear(initialUrl string) (string, error) {
 
 // ParseDriver Parse the driver standing info from formula1 website
 func ParseDriver() []model.Driver {
-	defaultYear := "2024" // Fallback year
+	defaultYear := strconv.Itoa(time.Now().Year()) // Dynamic default year
 	// Use a consistent page (like drivers) for fetching the latest year.
 	yearFetchingURL := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", defaultYear)
 	
@@ -213,7 +213,7 @@ func ParseDriver() []model.Driver {
 		log.Printf("Error fetching latest year for Drivers: %v. Falling back to default year %s.", err, defaultYear)
 		latestYear = defaultYear
 	} else {
-		log.Printf("Successfully fetched dynamic year for Drivers: %s.", latestYear)
+		// log.Printf("Successfully fetched dynamic year for Drivers: %s.", latestYear)
 	}
 	
 	driverUrl := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", latestYear)
@@ -225,68 +225,47 @@ func ParseDriver() []model.Driver {
 		return DriverList // Return empty list on error
 	}
 
-	if doc == nil {
-		log.Printf("ParseDriver: Document is nil after fetching from %s.", driverUrl)
-		return DriverList
-	}
+	// New structure uses standard table
+	data := doc.Find("table tbody tr")
+	data.Each(func(i int, s *goquery.Selection) {
+		pos := strings.TrimSpace(s.Find("td:nth-child(1)").Text())
+		
+		// Name is now in nested spans inside an anchor tag
+		// Structure: <a ...><span><span class="max-lg:hidden">First</span> <span class="max-md:hidden">Last</span><span class="md:hidden">CODE</span></span></a>
+		// We want First + Last.
+		driverCell := s.Find("td:nth-child(2)")
+		firstName := strings.TrimSpace(driverCell.Find("span.max-lg\\:hidden").Text())
+		lastName := strings.TrimSpace(driverCell.Find("span.max-md\\:hidden").Text())
+		name := fmt.Sprintf("%s %s", firstName, lastName)
+		
+		// Fallback if specific classes aren't found (robustness)
+		if firstName == "" && lastName == "" {
+			name = strings.TrimSpace(driverCell.Text())
+			// Clean up if it contains the code concatenated
+			name = parseName(name)
+		}
 
-	if doc == nil {
-		log.Printf("ParseDriver: Document is nil after fetching from %s.", driverUrl)
-		return DriverList
-	}
+		nation := strings.TrimSpace(s.Find("td:nth-child(3)").Text())
+		car := strings.TrimSpace(s.Find("td:nth-child(4)").Text())
+		pts := strings.TrimSpace(s.Find("td:nth-child(5)").Text())
 
-	// Attempt 1: Find any table
-	tables := doc.Find("table")
-	if tables.Length() == 0 {
-		log.Println("ParseDriver: No <table> elements found on the page.")
-		// Log body HTML snippet if no tables are found, to understand the structure
-		bodyHtml, _ := doc.Find("body").Html()
-		log.Printf("ParseDriver: Body HTML (first 1000 chars if no tables found):\n%s", snippet(bodyHtml, 1000))
-		return DriverList
-	}
-
-	log.Printf("ParseDriver: Found %d table(s). Processing the first one for structure.", tables.Length())
-	firstTable := tables.First()
-	tableHtml, _ := goquery.OuterHtml(firstTable) // Use OuterHtml for the whole table structure
-	log.Printf("ParseDriver: Outer HTML of first table found (first 500 chars):\n%s", snippet(tableHtml, 500))
-
-	// Explore rows of the first table
-	firstTable.Find("tbody tr").Each(func(i int, s *goquery.Selection) {
-		if i < 3 { // Log only first 3 rows
-			log.Printf("ParseDriver: Processing row %d of the first table", i)
-			s.Find("td").Each(func(j int, cell *goquery.Selection) {
-				log.Printf("ParseDriver: Row %d, Cell %d Text: '%s'", i, j, strings.TrimSpace(cell.Text()))
-				// Log HTML of the cell as well for more context
-				cellHtml, _ := cell.Html()
-				log.Printf("ParseDriver: Row %d, Cell %d HTML: %s", i, j, snippet(cellHtml, 100))
-			})
+		if pos != "" {
+			driver := model.Driver{
+				Pos:  pos,
+				Name: name,
+				Nat:  nation,
+				Team: car,
+				Pts:  pts,
+			}
+			DriverList = append(DriverList, driver)
 		}
 	})
-
-	// Actual data extraction logic remains commented out for this exploratory run
-	/*
-		var pos, name, nation, car, pts string // Variables for model.Driver fields
-		data := doc.Find(".resultsarchive-table tbody tr") // This selector will be updated based on findings
-		data.Each(func(i int, s *goquery.Selection) {
-			// ... existing data extraction logic ...
-			// if pos != "" {
-			// 	driver := model.Driver{
-			// 		Pos:  pos,
-			// 		Name: name,
-			// 		Nat:  nation,
-			// 		Team: car,
-			// 		Pts:  pts,
-			// 	}
-			// 	DriverList = append(DriverList, driver)
-			// }
-		})
-	*/
 	return DriverList
 }
 
 // ParseTeam Parse the constructor standing info from formula1 website
 func ParseTeam() []model.Team {
-	defaultYear := "2024" // Fallback year
+	defaultYear := strconv.Itoa(time.Now().Year()) // Dynamic default year
 	yearFetchingURL := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", defaultYear)
 	
 	latestYear, err := FetchLatestResultsYear(yearFetchingURL)
@@ -294,7 +273,7 @@ func ParseTeam() []model.Team {
 		log.Printf("Error fetching latest year for Teams: %v. Falling back to default year %s.", err, defaultYear)
 		latestYear = defaultYear
 	} else {
-		log.Printf("Successfully fetched dynamic year for Teams: %s.", latestYear)
+		// log.Printf("Successfully fetched dynamic year for Teams: %s.", latestYear)
 	}
 
 	teamUrl := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/team.html", latestYear)
@@ -307,7 +286,7 @@ func ParseTeam() []model.Team {
 	}
 	
 	// Assumes Pos, Team Name, Pts are in columns 1, 2, 3 respectively.
-	data := doc.Find(".resultsarchive-table tbody tr")
+	data := doc.Find("table tbody tr")
 	data.Each(func(i int, s *goquery.Selection) {
 		pos := strings.TrimSpace(s.Find("td:nth-child(1)").Text()) // Position in 1st column
 
@@ -334,7 +313,7 @@ func ParseTeam() []model.Team {
 
 // ParseRace Parse the F1 race info from formula1 website
 func ParseRace() []model.Race {
-	defaultYear := "2024" // Fallback year
+	defaultYear := strconv.Itoa(time.Now().Year()) // Dynamic default year
 	yearFetchingURL := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/drivers.html", defaultYear)
 
 	latestYear, err := FetchLatestResultsYear(yearFetchingURL)
@@ -342,7 +321,7 @@ func ParseRace() []model.Race {
 		log.Printf("Error fetching latest year for Races: %v. Falling back to default year %s.", err, defaultYear)
 		latestYear = defaultYear
 	} else {
-		log.Printf("Successfully fetched dynamic year for Races: %s.", latestYear)
+		// log.Printf("Successfully fetched dynamic year for Races: %s.", latestYear)
 	}
 
 	raceUrl := fmt.Sprintf("https://www.formula1.com/en/results.html/%s/races.html", latestYear)
@@ -355,7 +334,7 @@ func ParseRace() []model.Race {
 	}
 
 	// Assumes GrandPrix, Date, Winner, Car, Laps, Time are in columns 1-6.
-	data := doc.Find(".resultsarchive-table tbody tr")
+	data := doc.Find("table tbody tr")
 	data.Each(func(i int, s *goquery.Selection) {
 		grandPrix := strings.TrimSpace(s.Find("td:nth-child(1) a").Text()) // Grand Prix from 1st column (usually a link)
 		if grandPrix == "" { // Fallback if not a link
@@ -364,9 +343,16 @@ func ParseRace() []model.Race {
 
 		date := strings.TrimSpace(s.Find("td:nth-child(2)").Text()) // Date from 2nd column
 		
-		// Winner from 3rd column, parse to remove 3-letter code
-		winnerRaw := strings.TrimSpace(s.Find("td:nth-child(3)").Text())
-		winner := parseName(winnerRaw) // Use helper function
+		// Winner from 3rd column. Structure similar to driver name: nested spans in anchor.
+		winnerCell := s.Find("td:nth-child(3)")
+		firstName := strings.TrimSpace(winnerCell.Find("span.max-lg\\:hidden").Text())
+		lastName := strings.TrimSpace(winnerCell.Find("span.max-md\\:hidden").Text())
+		winner := fmt.Sprintf("%s %s", firstName, lastName)
+
+		if firstName == "" && lastName == "" {
+			winnerRaw := strings.TrimSpace(winnerCell.Text())
+			winner = parseName(winnerRaw) // Use helper function as fallback
+		}
 
 		car := strings.TrimSpace(s.Find("td:nth-child(4)").Text())       // Car from 4th column
 		laps := strings.TrimSpace(s.Find("td:nth-child(5)").Text())      // Laps from 5th column
